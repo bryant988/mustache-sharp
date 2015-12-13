@@ -50,6 +50,7 @@
     <Compile Include="NumberArgument.cs" />
     <Compile Include="PlaceholderArgument.cs" />
     <Compile Include="StringArgument.cs" />
+    <Compile Include="UnlessTagDefinition.cs" />
     <Compile Include="UpcastDictionary.cs" />
     <Compile Include="VariableArgument.cs" />
     <Compile Include="VariableFoundEventArgs.cs" />

@@ -897,7 +897,7 @@ Middle";
         }
 
         /// <summary>
-        /// If the condition evaluates to false, the content of an if statement should not be printed.
+        /// If the condition evaluates to true, the content of an if statement should be printed.
         /// </summary>
         [TestMethod]
         public void TestCompile_If_EvaluatesToTrue_PrintsContent()
@@ -1079,6 +1079,19 @@ Last";
             Assert.AreEqual(expected, result, "The wrong text was generated.");
         }
 
+        /// <summary>
+        /// If there is nested if statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedIf_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#if this}}1{{#if this}}2{{/if}}3{{/if}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(true);
+            Assert.AreEqual("Before123After", result, "The wrong text was generated.");
+        }
+
         #endregion
 
         #region If/Else
@@ -1123,6 +1136,19 @@ Last";
             Assert.AreEqual("BeforeNay{{#else}}BadAfter", result, "The wrong text was generated.");
         }
 
+        /// <summary>
+        /// If there is nested if/else statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedIfElse_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#if this}}Yay{{#if this}}Yay{{#else}}Nay{{/if}}{{#else}}Nay{{/if}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(true);
+            Assert.AreEqual("BeforeYayYayAfter", result, "The wrong text was generated.");
+        }
+
         #endregion
 
         #region If/Elif/Else
@@ -1144,7 +1170,7 @@ Last";
         /// If the elif statement evaluates to true, its block should be printed.
         /// </summary>
         [TestMethod]
-        public void TestCompile_IfElifElse_ElifTrue_PrintsIf()
+        public void TestCompile_IfElifElse_ElifTrue_PrintsElIf()
         {
             FormatCompiler parser = new FormatCompiler();
             const string format = "Before{{#if First}}First{{#elif Second}}Second{{#else}}Third{{/if}}After";
@@ -1164,6 +1190,19 @@ Last";
             Generator generator = parser.Compile(format);
             string result = generator.Render(new { First = false, Second = false });
             Assert.AreEqual("BeforeThirdAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there is nested if/elif/else statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedIfElifElse_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#if First}}First{{#if First}}First{{#elif Second}}Second{{#else}}Third{{/if}}{{#elif Second}}Second{{#else}}Third{{/if}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = true, Second = true });
+            Assert.AreEqual("BeforeFirstFirstAfter", result, "The wrong text was generated.");
         }
 
         #endregion
@@ -1193,6 +1232,466 @@ Last";
             const string format = "Before{{#if First}}First{{#elif Second}}Second{{#elif Third}}Third{{/if}}After";
             Generator generator = parser.Compile(format);
             string result = generator.Render(new { First = false, Second = false, Third = true });
+            Assert.AreEqual("BeforeThirdAfter", result, "The wrong text was generated.");
+        }
+
+        #endregion
+
+        #region Unless
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_EvaluatesToFalse_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_null_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(null);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_DBNull_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(DBNull.Value);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_EmptyIEnumerable_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(Enumerable.Empty<int>());
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_NullChar_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render('\0');
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_ZeroInt_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(0);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_ZeroFloat_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(0f);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_ZeroDouble_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(0.0);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_ZeroDecimal_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(0m);
+            Assert.AreEqual("BeforeContentAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to true, the content of an unless statement should not be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_Unless_EvaluatesToTrue_SkipsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Content{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(true);
+            Assert.AreEqual("BeforeAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header and footer appear on lines by themselves, they should not generate new lines.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineContentNewLineEndIf_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+Content
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Content", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header and footer appear on lines by themselves, they should not generate new lines.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineEndIf_PrintsNothing()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual(String.Empty, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the footer has content in front of it, the content should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineContentEndUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+Content{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Content", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header has content after it, the content should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessContentNewLineEndUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}Content
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Content", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header has content after it, the content should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_ContentUnlessNewLineEndUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"Content{{#unless this}}
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Content", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header and footer are adjacent, then there is no content.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessEndUnless_PrintsNothing()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual(String.Empty, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header and footer are adjacent, then there is no inner content.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_ContentUnlessEndUnless_PrintsNothing()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"Content{{#unless this}}{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Content", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the header and footer are adjacent, then there is no inner content.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineCommentEndUnless_PrintsNothing()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+{{#! comment}}{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual(String.Empty, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the a header follows a footer, it shouldn't generate a new line.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineContentNewLineEndUnlessUnlessNewLineContentNewLineEndUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+First
+{{/unless}}{{#unless this}}
+{{#newline}}
+Last
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            const string expected = @"First
+Last";
+            Assert.AreEqual(expected, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the content separates two if statements, it should be unaffected.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineEndUnlessNewLineContentNewLineUnlessNewLineEndUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+{{/unless}}
+Content
+{{#unless this}}
+{{/unless}}";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            const string expected = @"Content";
+            Assert.AreEqual(expected, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there is trailing text of any kind, the newline after content should be preserved.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessNewLineEndUnlessNewLineContentNewLineUnlessNewLineEndUnlessContent_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = @"{{#unless this}}
+{{/unless}}
+First
+{{#newline}}
+{{#unless this}}
+{{/unless}}
+Last";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            const string expected = @"First
+Last";
+            Assert.AreEqual(expected, result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there is nested unless statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedUnless_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}1{{#unless this}}2{{/unless}}3{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("Before123After", result, "The wrong text was generated.");
+        }
+
+        #endregion
+
+        #region Unless/Else
+
+        /// <summary>
+        /// If the condition evaluates to true, the content of an else statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElse_EvaluatesToTrue_PrintsElse()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Yay{{#else}}Nay{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(true);
+            Assert.AreEqual("BeforeNayAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the condition evaluates to false, the content of an unless statement should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElse_EvaluatesToFalse_PrintsUnless()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Yay{{#else}}Nay{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("BeforeYayAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// Second else blocks will result in an exceptions being thrown.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public void TestCompile_UnlessElse_TwoElses_IncludesSecondElseInElse_Throws()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Yay{{#else}}Nay{{#else}}Bad{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(true);
+            Assert.AreEqual("BeforeNay{{#else}}BadAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there is nested unless/else statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedUnlessElse_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless this}}Yay{{#unless this}}Yay{{#else}}Nay{{/unless}}{{#else}}Nay{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(false);
+            Assert.AreEqual("BeforeYayYayAfter", result, "The wrong text was generated.");
+        }
+
+        #endregion
+
+        #region Unless/Elif/Else
+
+        /// <summary>
+        /// If the unless statement evaluates to false, its block should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElifElse_IfFalse_PrintsIf()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#elif Second}}Second{{#else}}Third{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = false, Second = true });
+            Assert.AreEqual("BeforeFirstAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the elif statement evaluates to true, its block should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElifElse_ElifTrue_PrintsElIf()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#elif Second}}Second{{#else}}Third{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = true, Second = true });
+            Assert.AreEqual("BeforeSecondAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If the elif statement evaluates to false, the else block should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElifElse_ElifFalse_PrintsElse()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#elif Second}}Second{{#else}}Third{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = true, Second = false });
+            Assert.AreEqual("BeforeThirdAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there is nested unless/elif/else statements, they should all evaluate and print correctly
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_NestedUnlessElifElse_PrintsContent()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#unless First}}First{{#elif Second}}Second{{#else}}Third{{/unless}}{{#elif Second}}Second{{#else}}Third{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = false, Second = true });
+            Assert.AreEqual("BeforeFirstFirstAfter", result, "The wrong text was generated.");
+        }
+
+        #endregion
+
+        #region Unless/Elif
+
+        /// <summary>
+        /// If the elif statement evaluates to false and there is no else statement, nothing should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElif_ElifFalse_PrintsNothing()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#elif Second}}Second{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = true, Second = false });
+            Assert.AreEqual("BeforeAfter", result, "The wrong text was generated.");
+        }
+
+        /// <summary>
+        /// If there are two elif statements and the first is false, the second elif block should be printed.
+        /// </summary>
+        [TestMethod]
+        public void TestCompile_UnlessElifElif_ElifFalse_PrintsSecondElif()
+        {
+            FormatCompiler parser = new FormatCompiler();
+            const string format = "Before{{#unless First}}First{{#elif Second}}Second{{#elif Third}}Third{{/unless}}After";
+            Generator generator = parser.Compile(format);
+            string result = generator.Render(new { First = true, Second = false, Third = true });
             Assert.AreEqual("BeforeThirdAfter", result, "The wrong text was generated.");
         }
 
